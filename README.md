@@ -46,7 +46,7 @@ These can be interpreted as different commands.
 
 ## The cable wiring and more detailed explanation
 
-(also see diagram)
+(also see diagram 'wiring.png')
 
 * Pin 3 (red) must be connected through 
 	This is the ground pin
