@@ -1,0 +1,37 @@
+' Example program how to usend command pulses to the NXT.
+' This example reads the 4 directional buttons on the EV3 brick
+' and sends the currently pressed button to the NXT (only 
+' one button-press is sent concurrently). 
+
+' Values needed to create an NXT command pulse on the I2C bus
+ZEROBYTES = Vector.Init(31,0)  
+PULSESIZE[0] = 7
+PULSESIZE[1] = 15
+PULSESIZE[2] = 23
+PULSESIZE[3] = 31
+
+While "True"
+  ' Scan the buttons and determine which command to send.
+  B = Buttons.Current
+  If Text.IsSubText(B, "U") Then
+    COMMAND = 0
+  ElseIf Text.IsSubText(B, "D") Then
+    Command = 1
+  Elseif Text.IsSubText(B, "L") Then
+    COMMAND = 2
+  Elseif Text.IsSubText(B, "R") Then
+    COMMAND = 3 
+  Else
+    COMMAND = -1
+  EndIf
+
+  ' Send the appropriate command pulse.
+  If COMMAND>=0 Then
+    DUMMY = Sensor.CommunicateI2C(1, 0,PULSESIZE[COMMAND],1, ZEROBYTES)
+  Endif
+  
+  ' Repeat after shor delay. When the NXT program does not 
+  ' receive any more commands, it will stop the motors.
+  Program.Delay(50)
+EndWhile
+  

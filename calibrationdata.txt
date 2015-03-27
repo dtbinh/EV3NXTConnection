@@ -1,0 +1,46 @@
+Measurement how various pulse lengths were
+received by the NXT. To safely distinguish their meaning,
+choose pulse lengths that are sufficiently far apart.
+
+Bytes sent        Milliseconds of pulse received (min - max)
+1                 1  -  5      (possibly skipping pulses)
+2                 1  -  5      (possibly skipping pulses)
+3                 1  -  9      (possibly skipping pulses)
+4                 1  -  9      (possibly skipping pulses)
+5                 5  -  9
+6                 5  -  11
+7                 7  -  11
+8                 7  -  11
+9                 7  -  15
+10               11  -  15
+11               11  -  17
+12               11  -  17
+13               11  -  17
+14               13  -  21
+15               17  -  21
+16               17  -  23
+17               17  -  23
+18               19  -  23
+19               19  -  27
+20               21  -  27
+21               23  -  27
+22               23  -  29
+23               25  -  29
+24               25  -  33
+25               25  -  33
+26               29  -  33
+27               29  -  35
+28               31  -  35
+29               31  -  39
+30               31  -  39
+31               35  -  39
+
+
+To leave a little margin for error, I propose to use the 
+following possibilities:
+
+Command 0   -   send: 7 bytes   -   recognize: 4ms  -  13ms
+Command 1   -   send: 15 bytes  -   recognize: 14ms -  23ms
+Command 2   -   send: 23 bytes  -   recognize: 24ms -  32ms
+Command 3   -   send: 31 bytes  -   recognize: 33ms -  45ms
+

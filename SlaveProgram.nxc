@@ -1,0 +1,112 @@
+// Example program for a command receiving NXT brick
+// It will control the motors according to the last received command.
+
+
+int threashold;   // values below this level are considered active low
+
+// Initialize the command receive facility.
+void InitializeEV3Receiver()
+{
+  SetSensorType(IN_1, SENSOR_TYPE_TOUCH);
+  SetSensorMode(IN_1, SENSOR_MODE_RAW);
+
+  // Measure the highest voltage on the port. This is the idle state.
+  int highestvoltage  = 0;
+  int i;
+  for (i=0; i<1000; i++)
+  {
+      int s = SENSOR_1;
+      if (s>highestvoltage) highestvoltage = s;
+  }
+
+  // use a threashold value that is only a little below idle voltage
+  // (because of the big resistor in the cable the voltage differnce is divided
+  // down to only a fraction of the I2C potentials)
+  threashold = highestvoltage - 40;
+}
+
+// Wait until command arrives on port 1
+// and return one of the 4 possibilities or -1 in case of timeout
+int ReceiveEV3Command(int timeout)
+{
+  for (;;)
+  {
+      // when in middle of arriving command, need to skip it
+      while (SENSOR_1 < threashold);
+
+      // wait until command pulse arives
+      long startwait = CurrentTick();
+      while (SENSOR_1 >= threashold)
+      {
+          if (CurrentTick() > startwait+timeout)
+          {   return -1;
+          }
+      }
+
+      // memorize start time of pulse
+      long strt;
+      strt = CurrentTick();
+      int pulselength = 0;
+
+      // permanently check the pulse for 45 ms (maximum pulse length)
+      for (;;)
+      {
+          int l;
+          l = (CurrentTick() - strt);
+          if (l>45)
+          {   break;
+          }
+          int s = SENSOR_1;
+          if (s < threashold)
+          {
+             pulselength = l;
+          }
+      }
+
+      // check pulse length and determine which command this would be
+      if (pulselength<4) continue;    // too short for correct detection
+      if (pulselength<=13) return 0;
+      if (pulselength<=23) return 1;
+      if (pulselength<=32) return 2;
+      return 3;
+  }
+}
+
+
+// ------- main program -------
+
+task main()
+{
+  InitializeEV3Receiver();
+
+  for (;;)
+  {
+    int c = ReceiveEV3Command(150);
+    switch (c)
+    {  case 0:
+          OnFwd (OUT_A, 50);
+          Off(OUT_B);
+          break;
+       case 1:
+          OnRev (OUT_A, 50);
+          Off(OUT_B);
+          break;
+       case 2:
+          OnFwd (OUT_B, 50);
+          Off(OUT_A);
+          break;
+       case 3:
+          OnRev (OUT_B, 50);
+          Off(OUT_A);
+          break;
+       default:
+          Off(OUT_A);
+          Off(OUT_B);
+          break;
+    }
+  }
+}
+
+
+
+

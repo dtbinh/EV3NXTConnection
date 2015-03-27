@@ -1,0 +1,81 @@
+task main()
+{
+  SetSensorType(IN_1, SENSOR_TYPE_TOUCH);
+  SetSensorMode(IN_1, SENSOR_MODE_RAW);
+
+  int s;
+  int highestcurrency  = 0;
+  int lowestcurrency = 10000;
+
+  // measure the highest volate on port, this is the idle state
+  Wait(100);
+  int i;
+  for (i=0; i<1000; i++)
+  {
+      s = SENSOR_1;
+      if (s>highestcurrency) highestcurrency = s;
+  }
+
+  // because of 70kOhm resistor in the cable, the
+  // voltage in the analog sensor only drops a little when
+  // line is pulled down
+  int threashold = highestcurrency - 40;
+
+  int shortest = 1000;
+  int longest = 0;
+
+  int tries;
+  for (tries=0; tries<10000; tries++)
+  {
+      // wait until command pulse arives
+      while (SENSOR_1 >= threashold);
+
+      // memorize start time of pulse
+      long strt;
+      strt = CurrentTick();
+      int pulselength = 0;
+
+      // permanently check the pulse for 45 ms (maximum pulse length)
+      for (;;)
+      {
+          int l;
+          l = (CurrentTick() - strt);
+          if (l>45)
+          {   break;
+          }
+          s = SENSOR_1;
+          if (s < threashold)
+          {
+             pulselength = l;
+          }
+          if (s<lowestcurrency)
+          {
+              lowestcurrency = s;
+          }
+      }
+
+      if (ButtonPressed(BTNCENTER))
+      {
+        shortest = 10000;
+        longest = 0;
+      }
+
+      if (pulselength<shortest)
+      {   shortest = pulselength;
+      }
+      if (pulselength>longest)
+      {   longest = pulselength;
+      }
+
+
+      ResetScreen();
+      NumOut(0,LCD_LINE1, tries);
+      NumOut(0,LCD_LINE3, highestcurrency);
+      NumOut(0,LCD_LINE4, lowestcurrency);
+
+      NumOut(50,LCD_LINE1, pulselength);
+      NumOut(50,LCD_LINE3, shortest);
+      NumOut(50,LCD_LINE4, longest);
+    }
+}
+
