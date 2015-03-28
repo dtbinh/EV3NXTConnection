@@ -68,7 +68,8 @@ int ReceiveEV3Command(int timeout)
       if (pulselength<=13) return 0;
       if (pulselength<=23) return 1;
       if (pulselength<=32) return 2;
-      return 3;
+      if (pulselength<=42) return 3;
+      return -1;    // too long (probably dead line)
   }
 }
 
